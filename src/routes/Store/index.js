@@ -1,9 +1,7 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import Header from "../../components/Header";
 import Request from "../../components/Request";
 
-class Home extends React.Component {
+class Store extends React.Component {
     constructor(props){
         super(props);
         this.state = {
@@ -12,19 +10,17 @@ class Home extends React.Component {
     }
     render(){
         return (
-            <Request method="GET" path="/SicaUser/profile?id=5">
+            <Request method="GET" path="/Shop/products">
                 {({ loading, error, data }) => {
                     return (
                         <React.Fragment>
-                            <Header/>
                             <p>{JSON.stringify({ loading, error, data })}</p>
                         </React.Fragment>
                     )
                 }}
             </Request>
-
         )
     }
 }
 
-export default Home;
+export default Store;

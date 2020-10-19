@@ -7,6 +7,7 @@ import { Switch, Route, BrowserRouter as Router, Redirect } from "react-router-d
 // import LoggedHeader from "./LoggedHeader";
 const E404 = lazy(() => import('./E404'));
 const Home = lazy(() => import('./Home'));
+const Store = lazy(() => import('./Store'));
 
 
 const Routes = props => {
@@ -25,6 +26,7 @@ const Routes = props => {
             <Suspense fallback={<div></div>}>
                 <Switch>
                     <Route exact path="/" component={Home} />
+                    <Route exact path="/store" component={Store} />
                     <Route path="/" component={E404} />
                 </Switch>
             </Suspense>
