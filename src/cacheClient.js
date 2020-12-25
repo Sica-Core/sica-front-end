@@ -16,7 +16,9 @@ class CacheClient {
     );
     getStringFromObj = obj => JSON.stringify(this.sortObj(obj))
     storeRequest = (request, data) => {
-        this.store(this.getStringFromObj(request),data)
+        if (request.method === "GET"){
+            this.store(this.getStringFromObj(request),data)
+        }
     }
     getRequest = options => {
         return this.get(this.getStringFromObj(options))

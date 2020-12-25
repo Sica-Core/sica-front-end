@@ -1,4 +1,5 @@
 import React from "react";
+import Header from "../../components/Header";
 import Request from "../../components/Request";
 
 class Store extends React.Component {
@@ -10,15 +11,18 @@ class Store extends React.Component {
     }
     render(){
         return (
-            <Request method="GET" path="/Shop/products">
-                {({ loading, error, data }) => {
-                    return (
-                        <React.Fragment>
-                            <p>{JSON.stringify({ loading, error, data })}</p>
-                        </React.Fragment>
-                    )
-                }}
-            </Request>
+            <React.Fragment>
+                <Header/>
+                <Request method="GET" path="/Shop/products">
+                    {({ loading, error, data }) => {
+                        return (
+                            <React.Fragment>
+                                <p>{JSON.stringify({ loading, error, data })}</p>
+                            </React.Fragment>
+                        )
+                    }}
+                </Request>
+            </React.Fragment>
         )
     }
 }

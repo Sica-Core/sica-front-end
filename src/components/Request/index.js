@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "../../axios";
+import objectToFormData from "../../utils/objectToFormData";
 
 class Request extends React.Component {
     constructor(props){
@@ -7,47 +8,66 @@ class Request extends React.Component {
         this.state = {
             loading: undefined,
             data: undefined,
-            error: undefined
+            error: undefined,
+            error_messages: []
         }
         this.methodTypes = [ "POST", "GET", "DELETE", "PATCH", "PUT" ]
         if (this.methodTypes.indexOf(props.method) === -1) {
-            throw new Error(`CustomAppError: Invalid type ([ "POST", "GET", "DELETE", "PATCH", "PUT" ])`)
+            throw new Error(`CustomAppError: Invalid method type ([ "POST", "GET", "DELETE", "PATCH", "PUT" ])`)
         }
     }
-    sendRequest = (options,updateCacheOnly) => {
+    sendRequestBase = async (options,updateCacheOnly) => {
         if (!updateCacheOnly) this.setState({
             loading: true
         })
-        axios(options).then(data => {
-            window.cacheClient.storeRequest(options, data)
-            this.setState({ data: data.result || data, loading: false })
-        }).catch(error => {
-            if (!updateCacheOnly)   this.setState({ loading: false, error })
-        })
+        let return_data = false;
+        try {
+            let res = await fetch(options.url,options)
+            let data = await res.json()
+            let { statusCode, errors } = data;
+            console.log({statusCode, errors})
+            if (statusCode > 399){
+                this.setState({ error_messages: errors.map(x => x.errorMessage )})
+            } else {
+                window.cacheClient.storeRequest(options, data)
+                return_data = data;
+                this.setState({ data: data.result || data })
+            }
+            this.setState({ loading: false })
+        } catch (err) {
+            console.log(err)
+            if (!updateCacheOnly) this.setState({ error: err, loading: false })
+        }
+        return return_data;
     }
-    componentDidMount(){
+    sendRequest(data){
+        console.log({data, formData: objectToFormData(data)})
         let options = {
             method: this.props.method,
             headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
+                "Accept": "*/*",
+                // "Content-Type": "application/x-www-form-urlencoded",
+                "Accept-Encoding": "gzip, deflate, br",
                 ...this.props.headers
             },
-            data: this.props.data,
             url: window.__API_ENDPOINT__ + this.props.path
         }
-        console.log(window.__API_ENDPOINT__ + this.props.path)
+        if (this.props.method !== "GET") options.body = objectToFormData(data)
+        console.log(window.__API_ENDPOINT__ + this.props.path,options)
         try {
             let cache = window.cacheClient.getRequest(options)
             console.log({cache})
             this.setState({ loading: false, error: undefined, data: cache.result || cache })
-            this.sendRequest(options,true)
+            return this.sendRequestBase(options,true)
         } catch (err){
-            this.sendRequest(options)
+            return this.sendRequestBase(options)
         }
     }
+    componentDidMount(){
+        if (this.props.method === "GET") return this.sendRequest();
+    }
     render(){
-        return this.props.children(this.state)
+        return this.props.children({ ...this.state, sendRequest: data => this.sendRequest(data)})
     }
 }
 
