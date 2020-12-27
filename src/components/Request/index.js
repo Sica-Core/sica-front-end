@@ -23,6 +23,7 @@ class Request extends React.Component {
         let return_data = false;
         try {
             let res = await fetch(options.url,options)
+            console.log({res})
             let data = await res.json()
             let { statusCode, errors } = data;
             console.log({statusCode, errors})
@@ -52,7 +53,12 @@ class Request extends React.Component {
             },
             url: window.__API_ENDPOINT__ + this.props.path
         }
-        if (this.props.method !== "GET") options.body = objectToFormData(data)
+        if (this.props.json_body) options.headers["Content-Type"] = "application/json"
+        
+        if (this.props.method !== "GET") {
+            if (this.props.json_body) options.body = JSON.stringify(data)
+            else options.body = objectToFormData(data)
+        }
         console.log(window.__API_ENDPOINT__ + this.props.path,options)
         try {
             let cache = window.cacheClient.getRequest(options)
@@ -64,6 +70,7 @@ class Request extends React.Component {
         }
     }
     componentDidMount(){
+        console.log(this.props.method === "GET",this.props.method)
         if (this.props.method === "GET") return this.sendRequest();
     }
     render(){

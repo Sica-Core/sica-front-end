@@ -27,7 +27,7 @@ class Form extends React.Component {
             case "integer": { validation = validation.integer(); break; }
             case "positive": { validation = validation.positive(); break; }
         }
-        // if (validation && field.required) return validation.required()
+        if (validation && field.required) return validation.required()
         return validation;
     }
     onChange = key => e => {
@@ -39,49 +39,75 @@ class Form extends React.Component {
     }
     checkValidations = async args => {
         try {
-            console.log(args)
+            console.log({args})
             let val = await this.schema.validate(args, { abortEarly: false });
             return val
         } catch (err) {
             this.setErrorMessages(err.errors)
+            console.log("DDD",err.errors)
             return 0
         }
     }
     onSubmit = async e => {
         e.preventDefault();
+        console.log(555)
         this.setErrorMessages([])
         console.log(this.state.data,this.state.validations)
         let data = await this.checkValidations(this.state.data)
+        console.log({dddd:data})
         if (!data) return;
         this.props.onSubmit(data)
     } 
+    getFieldsJSX = () => this.props.fields.map(field => (
+        <React.Fragment>
+            {field.label}:
+            <input 
+                type={field.type || "text"} 
+                value={this.state.data[field.key]}
+                onChange={this.onChange(field.key)}
+            /><br/>
+        </React.Fragment>
+    ))
+    getErrorsJSX = () => {
+        let { error_messages } = this.state;
+        let { error_messages: error_messages_2 } = this.props;
+        console.log({error_messages,error_messages_2})
+        let errors = error_messages;
+        if (!errors.length) errors = error_messages_2 ? error_messages_2 : []
+        if (this.props.error_messages) 
+        return errors.map(x => <p style={{color: "red"}}>{x}<br/></p>)
+    }
+    getErrorsJSXCustom = errors => errors.concat(
+        this.props.error_messages || []
+    ).map(x => <p style={{color: "red"}}>{x}<br/></p>)
+    getButtonJSX = () => (
+        <input type="submit" value={this.props.submit_button_value || "submit"}/>
+    )
+    getFormJSX = () => (
+        <form onSubmit={this.onSubmit}>
+            {this.getErrorsJSX()}
+            {this.getFieldsJSX()}
+            {this.getButtonJSX()}
+        </form>
+    )
     render(){
         if (this.props.children) {
-            let { error_messages, fields } = this.state;
-            return this.props.children({
-                error_messages, fields, ...this.props
-            })
+            let { error_messages } = this.state;
+            let props = {
+                fields: this.props.fields.map(f => {
+                    f.onChange = this.onChange(f.key);
+                    return f;
+                }),
+                fields_jsx: this.getFieldsJSX(),
+                button_jsx: this.getButtonJSX(),
+                errors_jsx: this.getErrorsJSX(),
+                form_jsx: this.getFormJSX(),
+                getErrorsJSXCustom: errors => this.getErrorsJSXCustom(errors),
+                error_messages, ...this.props
+            }
+            return this.props.children(props)
         }
-        return (
-            <form onSubmit={this.onSubmit}>
-                { 
-                    this.state.error_messages.concat(
-                        this.props.error_messages || []
-                    ).map(x => <p style={{color: "red"}}>{x}<br/></p>)
-                }
-                {this.props.fields.map(field => (
-                    <React.Fragment>
-                        {field.label}:
-                        <input 
-                            type={field.type || "text"} 
-                            value={this.state.data[field.key]}
-                            onChange={this.onChange(field.key)}
-                        /><br/>
-                    </React.Fragment>
-                ))}
-                <input type="submit" value={this.props.submit_button_value || "submit"}/>
-            </form>
-        )
+        return this.getFormJSX()
     }
 }
 

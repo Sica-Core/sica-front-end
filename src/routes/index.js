@@ -1,37 +1,44 @@
 import React, { Suspense, lazy } from "react";
 import { Switch, Route, BrowserRouter as Router, Redirect } from "react-router-dom";
-
-import NotLoggedInOnly from "../components/NotLoggedInOnly";
-import LoggedInOnly from "../components/LoggedInOnly";
+import LoggedHeader from "../components/LoggedHeader";
+import NotLoggedHeader from "../components/NotLoggedHeader";
+import LoggedInOnly from "../components/LoggedInOnly"
+import NotLoggedInOnly from "../components/NotLoggedInOnly"
 
 const E404 = lazy(() => import('./E404'));
-const Home = lazy(() => import('./Home'));
+const Test = lazy(() => import("./Test"));
 
 let only_logged_in = [
     { path: "/store", Component: lazy(() => import('./Store')) },
-    // { path: "/installers", Component: lazy(() => import('./Installers')) },
-    // { path: "/floors", Component: lazy(() => import('./Floors')) },
+    { path: "/videos", Component: lazy(() => import('./Videos')) },
+    { path: "/games", Component: lazy(() => import('./Games')) },
+    { path: "/shop", Component: lazy(() => import('./Shop')) },
+    { path: "/explore", Component: lazy(() => import('./Home2')) },
+    { path: "/feed", Component: lazy(() => import('./Feed')) },
     { path: "/logout", Component: lazy(() => import('./Logout')) }
 ]
 
 let only_not_logged_in = [
-    { path: "/register", Component: lazy(() => import('./Register')) }
+    { path: "/register2", Component: lazy(() => import('./Register2')) },
+    { path: "/register", Component: lazy(() => import('./Register')) },
+    { path: "/login", Component: lazy(() => import('./Login')) }
 ]
 
 const Routes = props => {
     return (
         <Router>
             {/* <React.Fragment>
-                <LoggedInProtected justDontRender={true}>
+                <LoggedInOnly justDontRender={true}>
                     <NotLoggedHeader />
-                </LoggedInProtected>
+                </LoggedInOnly>
 
-                <NotLoggedInProtected justDontRender={true}>
+                <NotLoggedInOnly justDontRender={true}>
                     <LoggedHeader />
-                </NotLoggedInProtected>
+                </NotLoggedInOnly>
             </React.Fragment> */}
 
             <Suspense fallback={<div></div>}>
+                <Route exact path="/test" component={Test}/>
                 {/* <Switch>
                     <Route exact path="/" component={Home} />
                     <Route exact path="/store" component={Store} />
@@ -39,7 +46,6 @@ const Routes = props => {
                     <Route path="/" component={E404} />
                 </Switch> */}
                 <Switch>
-                    <Route exact path="/" component={Home} />
                     {
                         only_logged_in.map(({path, Component},i) => (
                                 <Route key={i} exact path={path} component={props => {
@@ -55,7 +61,7 @@ const Routes = props => {
                         only_not_logged_in.map(({path, Component},i) => (
                                 <Route key={i} exact path={path} component={props => {
                                     return (
-                                        <NotLoggedInOnly redirect_to="/">
+                                        <NotLoggedInOnly redirect_to="/explore">
                                             <Component {...props}/>
                                         </NotLoggedInOnly>
                                     )
