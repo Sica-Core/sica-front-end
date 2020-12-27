@@ -1,6 +1,7 @@
 import React from "react";
 import injectUser from "../../HoC/injectUser";
 import Request from "../Request";
+import { toast } from 'react-toastify';
 
 
 class BuyProductButton extends React.Component {
@@ -11,6 +12,7 @@ class BuyProductButton extends React.Component {
         }
     }
     render(){
+        let { product } = this.props;
         return (
             <Request headers={{
                 "Content-Type": "application/json"
@@ -23,9 +25,15 @@ class BuyProductButton extends React.Component {
                     return <button onClick={async () => {
                         let success = await sendRequest({
                             "Id": this.props.current_user.id,
-                            "ProductId": this.props.product_id
+                            "ProductId": this.props.product.id
                         })
-                        if (success) this.props.onSuccess()
+                        if (success) {
+                            this.props.onSuccess()
+                            toast.success(`Product ${product.name} bought`)
+                            this.props.user_refetch()
+                        } else {
+                            toast.error("Failed to buy product")
+                        }
                     }} className="button">Buy</button>
                 }}
             </Request>

@@ -49,6 +49,7 @@ class Form extends React.Component {
         }
     }
     onSubmit = async e => {
+        console.log(33333)
         e.preventDefault();
         console.log(555)
         this.setErrorMessages([])
@@ -56,7 +57,7 @@ class Form extends React.Component {
         let data = await this.checkValidations(this.state.data)
         console.log({dddd:data})
         if (!data) return;
-        this.props.onSubmit(data)
+        this.props.onSuccess(data)
     } 
     getFieldsJSX = () => this.props.fields.map(field => (
         <React.Fragment>
@@ -98,6 +99,11 @@ class Form extends React.Component {
                     f.onChange = this.onChange(f.key);
                     return f;
                 }),
+                onSubmit: e => {
+                    e.preventDefault();
+                    console.log(555);
+                    this.onSubmit(e)
+                },
                 fields_jsx: this.getFieldsJSX(),
                 button_jsx: this.getButtonJSX(),
                 errors_jsx: this.getErrorsJSX(),

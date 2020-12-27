@@ -10,7 +10,6 @@ class SideBar extends React.Component {
     }
     getClassname = path => this.props.history.location.pathname === path ? "active" : ""
     render(){
-        console.log({d:this.props.history})
         return (
             <section className="sidebar">
                 <div className="sidebar__logo">
